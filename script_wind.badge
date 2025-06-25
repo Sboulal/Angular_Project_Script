@@ -15,8 +15,8 @@ const pythonServer = spawn('py', ['run_server.py'], {
 
 // Wait then start Angular
 setTimeout(() => {
-    console.log('⚡ Starting Angular server...');
-    const angularServer = spawn('ng', ['serve'], {
+    console.log('⚡ Installing npm packages and starting Angular server...');
+    const angularServer = spawn('npm install && ng serve', [], {
         cwd: 'Read_excel_data_angular-main',
         stdio: 'inherit', 
         shell: true
