@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+const { spawn } = require('child_process');
+const path = require('path');
+
+console.log('🚀 Starting Full Stack Project...');
+
+// Start Python server
+console.log('🐍 Starting Python server...');
+const pythonServer = spawn('py', ['run_server.py'], {
+    cwd: 'PRINTPROD',
+    stdio: 'inherit',
+    shell: true
+});
+
+// Wait then start Angular
+setTimeout(() => {
+    console.log('⚡ Starting Angular server...');
+    const angularServer = spawn('ng', ['serve'], {
+        cwd: 'Read_excel_data_angular-main',
+        stdio: 'inherit', 
+        shell: true
+    });
+
+    // Handle Ctrl+C
+    process.on('SIGINT', () => {
+        console.log('\n🛑 Stopping servers...');
+        pythonServer.kill();
+        angularServer.kill();
+        process.exit(0);
+    });
+
+}, 3000);
+
+console.log('✅ Both servers starting...');
+console.log('🌐 Python: http://localhost:5000');
+console.log('🌐 Angular: http://localhost:4200');
