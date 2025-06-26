@@ -1,0 +1,40 @@
+<div class="d-flex justify-content-center align-items-center mt-5">
+  <div class="card">
+    <div class="tab-content">
+      <div class="tab-pane fade show active">
+        <form (ngSubmit)="onSubmit()" #userForm="ngForm">
+          <div class="form px-4 pt-5">
+            <h4 class="text-left" style="color: #8f9194;">Nom & Prenom</h4>
+            
+            <input 
+              type="text" 
+              name="fullName" 
+              class="form-control mb-3" 
+              [(ngModel)]="fullName"
+              required
+              #fullNameInput="ngModel">
+            
+            
+
+            <div class="d-flex gap-2">
+              <!-- <button 
+                type="submit" 
+                class="btn btn-success btn-block flex-fill"
+                [disabled]="userForm.invalid">
+                Ajouter
+              </button> -->
+              <button 
+                type="button" 
+                class="btn btn-dark btn-block flex-fill"
+                (click)="onSubmit()">
+                Imprimer
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="tab-pane fade">
+      </div>
+    </div>
+  </div>
+</div>

@@ -22,6 +22,23 @@ setTimeout(() => {
         shell: true
     });
 
+    // Wait for Angular server to be ready
+    angularServer.on('spawn', () => {
+        console.log('📦 Angular process started...');
+        
+        // Wait additional time for server to be fully ready
+        setTimeout(() => {
+            console.log('🌐 Opening browser...');
+            const { exec } = require('child_process');
+            
+            // Cross-platform browser opening
+            const openCommand = process.platform === 'win32' ? 'start' : 
+                               process.platform === 'darwin' ? 'open' : 'xdg-open';
+            
+            exec(`${openCommand} http://localhost:4600`);
+        }, 10000); // Wait 10 seconds after Angular starts
+    });
+
     // Handle Ctrl+C
     process.on('SIGINT', () => {
         console.log('\n🛑 Stopping servers...');
@@ -34,4 +51,4 @@ setTimeout(() => {
 
 console.log('✅ Both servers starting...');
 console.log('🌐 Python: http://localhost:5000');
-console.log('🌐 Angular: http://localhost:4200');
+console.log('🌐 Angular: http://localhost:4600');

@@ -1,27 +1,54 @@
-#!/bin/bash
+#!/usr/bin/env node
 
-echo "Starting Full Stack Project..."
+const { spawn } = require('child_process');
+const path = require('path');
 
-# Start Python server in background
-echo "Starting Python server..."
-(cd PRINTPROD && py run_server.py) &
-PYTHON_PID=$!
+console.log('🚀 Starting Full Stack Project...');
 
-# Wait 3 seconds
-sleep 3
+// Start Python server
+console.log('🐍 Starting Python server...');
+const pythonServer = spawn('py', ['run_server.py'], {
+    cwd: 'PRINTPROD',
+    stdio: 'inherit',
+    shell: true
+});
 
-# Start Angular server in background
-echo "Starting Angular server..."
-(cd Read_excel_data_angular-main && ng serve) &
-ANGULAR_PID=$!
+// Wait then start Angular
+setTimeout(() => {
+    console.log('⚡ Installing npm packages and starting Angular server...');
+    const angularServer = spawn('npm install && ng serve', [], {
+        cwd: 'Read_excel_data_angular-main',
+        stdio: 'inherit', 
+        shell: true
+    });
 
-echo "Both servers are starting..."
-echo "Python: http://localhost:5000"
-echo "Angular: http://localhost:4200"
-echo "Press Ctrl+C to stop both servers"
+    // Wait for Angular server to be ready
+    angularServer.on('spawn', () => {
+        console.log('📦 Angular process started...');
+        
+        // Wait additional time for server to be fully ready
+        setTimeout(() => {
+            console.log('🌐 Opening browser...');
+            const { exec } = require('child_process');
+            
+            // Cross-platform browser opening
+            const openCommand = process.platform === 'win32' ? 'start' : 
+                               process.platform === 'darwin' ? 'open' : 'xdg-open';
+            
+            exec(`${openCommand} http://localhost:4600`);
+        }, 10000); // Wait 10 seconds after Angular starts
+    });
 
-# Wait for user to stop
-trap 'echo "Stopping servers..."; kill $PYTHON_PID $ANGULAR_PID 2>/dev/null; exit' INT
+    // Handle Ctrl+C
+    process.on('SIGINT', () => {
+        console.log('\n🛑 Stopping servers...');
+        pythonServer.kill();
+        angularServer.kill();
+        process.exit(0);
+    });
 
-# Keep script running
-wait
+}, 3000);
+
+console.log('✅ Both servers starting...');
+console.log('🌐 Python: http://localhost:5000');
+console.log('🌐 Angular: http://localhost:4600');

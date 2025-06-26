@@ -1,0 +1,180 @@
+<div class="container">
+  <div class="header">
+    <h2>Données de l'utilisateur:</h2>
+    <button (click)="refreshData()" class="refresh-btn" [disabled]="isLoading">
+      <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-1"></span>
+      {{ isLoading ? 'Chargement...' : 'Actualiser' }}
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="alert alert-success" *ngIf="successMessage" style="margin: 10px 0; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+    {{ successMessage }}
+  </div>
+  <div class="alert alert-danger" *ngIf="errorMessage" style="margin: 10px 0; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Search Input -->
+  <div class="search-container">
+    <input 
+      type="text"
+      class="search-input"
+      placeholder="Rechercher (nom, prénom, ID)..."
+      [(ngModel)]="searchTerm"
+      (input)="onSearchInput()"
+    />
+  </div>
+
+  <!-- Pagination Controls Top -->
+  <div class="pagination-controls-top" *ngIf="filteredUsers.length > 0" style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+    <div style="display: flex; align-items: center;">
+      <label for="itemsPerPage" style="margin-right: 8px; margin-bottom: 0;">Afficher:</label>
+      <select 
+        id="itemsPerPage" 
+        style="padding: 4px 8px; border: 1px solid #ced4da; border-radius: 4px; width: auto;" 
+        (change)="onItemsPerPageChange($event)"
+        [value]="pagination.itemsPerPage">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+      <span style="margin-left: 8px; color: #6c757d;">entrées par page</span>
+    </div>
+    
+    <div style="color: #6c757d;">
+      Affichage de {{ getStartIndex() }} à {{ getEndIndex() }} sur {{ pagination.totalItems }} entrées
+      <span *ngIf="searchTerm">(filtré de {{ users.length }} total)</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Nom</th>
+          <th>Prenom</th>
+          <th>Statut</th>
+          <th>Creation de date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of getPaginatedUsers(); let i = index">
+          <td>{{ user.id || getOriginalIndex(user) + 1 }}</td>
+          <td>{{ user.nom }}</td>
+          <td>{{ user.prenom }}</td>
+          <td>
+            <span class="green-checkmark" *ngIf="user.valide === '1'">&#10003;</span>
+            <span *ngIf="user.valide === '0'">&#x274C;</span>
+          </td>
+          <td>{{ user.created_at | date: 'short' }}</td>
+          <td>
+            <div class="btn-group" role="group">
+              <button 
+                (click)="selectAndSubmitUser(i)" 
+                class="btn btn-secondary me-2"
+                [disabled]="isLoading">
+                <span *ngIf="isLoading && selectedUserIndex === getOriginalIndex(getPaginatedUsers()[i])" class="spinner-border spinner-border-sm me-1"></span>
+                Imprimer
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="getPaginatedUsers().length === 0 && !isLoading">
+          <td colspan="6" class="no-data">
+            {{ searchTerm ? 'Aucun utilisateur trouvé pour "' + searchTerm + '"' : 'Aucun utilisateur' }}
+          </td>
+        </tr>
+        <tr *ngIf="isLoading">
+          <td colspan="6" class="no-data">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Chargement des données...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Controls Bottom -->
+  <nav aria-label="Page navigation" *ngIf="filteredUsers.length > 0 && pagination.totalPages > 1" style="margin-top: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="color: #6c757d;">
+        Page {{ pagination.currentPage }} sur {{ pagination.totalPages }}
+      </div>
+      
+      <ul class="pagination" style="display: flex; list-style: none; margin: 0; padding: 0;">
+        <!-- Previous button -->
+        <li style="margin-right: 5px;" [class]="pagination.currentPage === 1 ? 'disabled' : ''">
+          <button 
+            style="padding: 8px 12px; border: 1px solid #dee2e6; background-color: #fff; color: #007bff; text-decoration: none; border-radius: 4px;" 
+            (click)="previousPage()" 
+            [disabled]="pagination.currentPage === 1"
+            [style.opacity]="pagination.currentPage === 1 ? '0.5' : '1'">
+            ← Précédent
+          </button>
+        </li>
+
+        <!-- First page -->
+        <li style="margin-right: 5px;" *ngIf="pagination.currentPage > 3">
+          <button 
+            style="padding: 8px 12px; border: 1px solid #dee2e6; background-color: #fff; color: #007bff; text-decoration: none; border-radius: 4px;" 
+            (click)="goToPage(1)">1</button>
+        </li>
+        
+        <!-- Ellipsis -->
+        <li style="margin-right: 5px;" *ngIf="pagination.currentPage > 4">
+          <span style="padding: 8px 12px; border: 1px solid #dee2e6; background-color: #e9ecef; color: #6c757d; border-radius: 4px;">...</span>
+        </li>
+
+        <!-- Page numbers around current page -->
+        <li style="margin-right: 5px;" 
+            *ngFor="let page of getVisiblePages()" 
+            [class]="page === pagination.currentPage ? 'active' : ''">
+          <button 
+            [style.background-color]="page === pagination.currentPage ? '#007bff' : '#fff'"
+            [style.color]="page === pagination.currentPage ? '#fff' : '#007bff'"
+            style="padding: 8px 12px; border: 1px solid #dee2e6; text-decoration: none; border-radius: 4px;" 
+            (click)="goToPage(page)">{{ page }}</button>
+        </li>
+
+        <!-- Ellipsis -->
+        <li style="margin-right: 5px;" *ngIf="pagination.currentPage < pagination.totalPages - 3">
+          <span style="padding: 8px 12px; border: 1px solid #dee2e6; background-color: #e9ecef; color: #6c757d; border-radius: 4px;">...</span>
+        </li>
+
+        <!-- Last page -->
+        <li style="margin-right: 5px;" *ngIf="pagination.currentPage < pagination.totalPages - 2">
+          <button 
+            style="padding: 8px 12px; border: 1px solid #dee2e6; background-color: #fff; color: #007bff; text-decoration: none; border-radius: 4px;" 
+            (click)="goToPage(pagination.totalPages)">{{ pagination.totalPages }}</button>
+        </li>
+
+        <!-- Next button -->
+        <li [class]="pagination.currentPage === pagination.totalPages ? 'disabled' : ''">
+          <button 
+            style="padding: 8px 12px; border: 1px solid #dee2e6; background-color: #fff; color: #007bff; text-decoration: none; border-radius: 4px;" 
+            (click)="nextPage()" 
+            [disabled]="pagination.currentPage === pagination.totalPages"
+            [style.opacity]="pagination.currentPage === pagination.totalPages ? '0.5' : '1'">
+            Suivant →
+          </button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Summary Information -->
+  <div style="margin-top: 15px; color: #6c757d; font-size: 14px;" *ngIf="filteredUsers.length > 0">
+    <div>
+      <small>
+        Total: {{ filteredUsers.length }} utilisateur(s)
+        <span *ngIf="searchTerm"> trouvé(s) pour "{{ searchTerm }}"</span>
+        <span *ngIf="searchTerm"> sur {{ users.length }} total</span>
+      </small>
+    </div>
+  </div>
+</div>
