@@ -9,7 +9,7 @@ interface User {
   id?: number;
   nom: string;
   prenom: string;
-
+  email: string;
   valide: string;
   created_at: string;
   updated_at: string;
@@ -49,7 +49,8 @@ export class GetDataComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
   // Replace with your actual API endpoint
-  private apiUrl = 'https://amfromevent.ma/api/getbadges';
+  private apiUrl = 'https://badges.spherebleue.com/api/getbadges';
+
 
   constructor(private http: HttpClient, public dataService: DataService) {
     // Debounce search input to avoid excessive filtering

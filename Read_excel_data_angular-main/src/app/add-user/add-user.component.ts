@@ -4,8 +4,9 @@ import { DataService } from '../data.service';
 
 interface User {
   id?: number;
-  first_name: string;
-  last_name: string;
+  nom: string;
+  prenom: string;
+  email: string;
 }
 
 @Component({
@@ -14,33 +15,45 @@ interface User {
   styleUrls: ['./add-user.component.scss']
 })
 export class AddUserComponent {
-  fullName: string = '';
   user: User = {
-    last_name: '',
-    first_name: ''
+    nom: '',
+    prenom: '',
+    email: ''
   };
 
-  // Inject your dataService instead of HttpClient
-  constructor(private dataService:DataService,private http: HttpClient) {} // Replace 'any' with your actual DataService type
+  constructor(private dataService: DataService, private http: HttpClient) {}
 
   onSubmit() {
-    if (this.fullName.trim()) {
-      // Store the entire full name in first_name
-      this.user.first_name = this.fullName.trim();
-      
-      // Store a single space in last_name
-      this.user.last_name = " ";
-  
-      // Use your dataService instead of direct HTTP call
-      this.dataService.postUserinput(this.user).subscribe(response => {
-        console.log('User added:', this.user);
-        console.log('Response:', response);
-        this.dataService.setUsers([...this.dataService.getUsers(), this.user]);
-        this.fullName = '';
+    // Validate all fields are filled
+    if (this.user.nom.trim() && this.user.prenom.trim() && this.user.email.trim()) {
+      // Prepare complete user data for the service
+      const userData = {
+        nom: this.user.nom.trim(),
+        prenom: this.user.prenom.trim(),
+        email: this.user.email.trim()
+      };
+
+      // Use your dataService to post user input
+      this.dataService.postUserinput(userData).subscribe({
+        next: (response) => {
+          console.log('User added:', userData);
+          console.log('Response:', response);
+          this.dataService.setUsers([...this.dataService.getUsers(), userData]);
+          
+          // Reset form
+          this.user = {
+            nom: '',
+            prenom: '',
+            email: ''
+          };
+        },
+        error: (error) => {
+          console.error('Error adding user:', error);
+          alert('Erreur lors de l\'ajout de l\'utilisateur');
+        }
       });
     } else {
-      alert('Veuillez entrer le last_name et prélast_name');
+      alert('Veuillez remplir tous les champs: nom, prénom et email');
     }
   }
- 
 }

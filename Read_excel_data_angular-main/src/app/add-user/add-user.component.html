@@ -4,29 +4,52 @@
       <div class="tab-pane fade show active">
         <form (ngSubmit)="onSubmit()" #userForm="ngForm">
           <div class="form px-4 pt-5">
-            <h4 class="text-left" style="color: #8f9194;">Nom & Prenom</h4>
-            
+            <h4 class="text-left" style="color: #8f9194;">Nom</h4>
             <input 
               type="text" 
-              name="fullName" 
+              name="nom" 
               class="form-control mb-3" 
-              [(ngModel)]="fullName"
+              [(ngModel)]="user.nom"
+              placeholder="Entrez le nom"
               required
-              #fullNameInput="ngModel">
-            
-            
+              #nomInput="ngModel">
+            <div *ngIf="nomInput.invalid && nomInput.touched" class="text-danger mb-2">
+              Le nom est requis
+            </div>
+              
+            <h4 class="text-left" style="color: #8f9194;">Prénom</h4>
+            <input 
+              type="text" 
+              name="prenom" 
+              class="form-control mb-3" 
+              [(ngModel)]="user.prenom"
+              placeholder="Entrez le prénom"
+              required
+              #prenomInput="ngModel">
+            <div *ngIf="prenomInput.invalid && prenomInput.touched" class="text-danger mb-2">
+              Le prénom est requis
+            </div>
+                
+            <h4 class="text-left" style="color: #8f9194;">Email</h4>
+            <input 
+              type="email" 
+              name="email" 
+              class="form-control mb-3" 
+              [(ngModel)]="user.email"
+              placeholder="Entrez l'email"
+              required
+              email
+              #emailInput="ngModel">
+            <div *ngIf="emailInput.invalid && emailInput.touched" class="text-danger mb-2">
+              <span *ngIf="emailInput.errors?.['required']">L'email est requis</span>
+              <span *ngIf="emailInput.errors?.['email']">Format d'email invalide</span>
+            </div>
 
             <div class="d-flex gap-2">
-              <!-- <button 
-                type="submit" 
-                class="btn btn-success btn-block flex-fill"
-                [disabled]="userForm.invalid">
-                Ajouter
-              </button> -->
               <button 
-                type="button" 
+                type="submit" 
                 class="btn btn-dark btn-block flex-fill"
-                (click)="onSubmit()">
+                [disabled]="userForm.invalid">
                 Imprimer
               </button>
             </div>

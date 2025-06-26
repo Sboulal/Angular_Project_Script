@@ -110,7 +110,7 @@ export class DataService {
   // Updated postUser method using forkJoin to call multiple APIs in parallel
   postUser(user: any): Observable<any[]> {
     const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
-    const secondAPI$ = this.http.post('https://dummyjson.com/posts', user); // Replace with your actual second endpoint
+    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', user); // Replace with your actual second endpoint
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(
@@ -120,7 +120,7 @@ export class DataService {
 
   postUser_data(user: any): Observable<any[]> {
     const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
-    const secondAPI$ = this.http.post('https://dummyjson.com/posts', user); // Replace with your actual second endpoint
+    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', user); // Replace with your actual second endpoint
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(
@@ -128,17 +128,40 @@ export class DataService {
       );
   }
   
+  // postUserinput(user: any): Observable<any[]> {
+  //   const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
+  //   const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', user); // Replace with your actual second endpoint
+    
+  //   return forkJoin([firstAPI$, secondAPI$])
+  //     .pipe(
+  //       catchError(this.handleError)
+  //     );
+  // }
+
   postUserinput(user: any): Observable<any[]> {
-    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
-    const secondAPI$ = this.http.post('https://dummyjson.com/posts', user); // Replace with your actual second endpoint
+    // First API receives only nom and prenom
+    const firstAPIData = {
+      nom: user.nom,
+      prenom: user.prenom
+    };
+    
+    // Second API receives nom, prenom, and email
+    const secondAPIData = {
+      nom: user.nom,
+      prenom: user.prenom,
+      email: user.email
+    };
+    
+    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', firstAPIData);
+    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', secondAPIData);
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(
         catchError(this.handleError)
       );
   }
-
   // Error handling method
+
   private handleError(error: any): Observable<never> {
     console.error('API Error:', error);
     return throwError(() => new Error(error.message || 'Server Error'));
