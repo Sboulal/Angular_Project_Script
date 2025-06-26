@@ -1,4 +1,3 @@
-
 const { spawn, exec } = require('child_process');
 const path = require('path');
 
@@ -59,52 +58,36 @@ const pythonServer = spawn('py', ['run_server.py'], {
     shell: true
 });
 
-// Wait then start Angular
+// Wait then start Angular (without npm install)
 setTimeout(() => {
-    console.log('⚡ Installing npm packages and starting Angular server...');
+    console.log('⚡ Starting Angular server...');
     
-    // Split npm install and ng serve for better control
-    const npmInstall = spawn('npm', ['install'], {
+    // Start Angular server directly
+    const angularServer = spawn('ng', ['serve', '--port', '4600'], {
         cwd: 'Read_excel_data_angular-main',
         stdio: 'inherit',
         shell: true
     });
     
-    npmInstall.on('close', (code) => {
-        if (code === 0) {
-            console.log('📦 npm packages installed successfully');
-            
-            // Start Angular server
-            const angularServer = spawn('ng', ['serve', '--port', '4600'], {
-                cwd: 'Read_excel_data_angular-main',
-                stdio: 'inherit',
-                shell: true
-            });
-            
-            // Check when Angular server is ready
-            console.log('🔍 Waiting for Angular server to be ready...');
-            checkPort(4600, (isReady) => {
-                if (isReady) {
-                    console.log('✅ Angular server is ready!');
-                    console.log('🌐 Opening browser...');
-                    openBrowser('http://localhost:4600');
-                } else {
-                    console.log('❌ Angular server failed to start or is not responding');
-                    console.log('🌐 Please manually check: http://localhost:4600');
-                }
-            });
-            
-            // Handle Ctrl+C for Angular server
-            process.on('SIGINT', () => {
-                console.log('\n🛑 Stopping servers...');
-                pythonServer.kill('SIGTERM');
-                angularServer.kill('SIGTERM');
-                process.exit(0);
-            });
-            
+    // Check when Angular server is ready
+    console.log('🔍 Waiting for Angular server to be ready...');
+    checkPort(4600, (isReady) => {
+        if (isReady) {
+            console.log('✅ Angular server is ready!');
+            console.log('🌐 Opening browser...');
+            openBrowser('http://localhost:4600');
         } else {
-            console.log('❌ npm install failed with code:', code);
+            console.log('❌ Angular server failed to start or is not responding');
+            console.log('🌐 Please manually check: http://localhost:4600');
         }
+    });
+    
+    // Handle Ctrl+C for both servers
+    process.on('SIGINT', () => {
+        console.log('\n🛑 Stopping servers...');
+        pythonServer.kill('SIGTERM');
+        angularServer.kill('SIGTERM');
+        process.exit(0);
     });
     
 }, 3000);
@@ -119,3 +102,4 @@ process.on('SIGINT', () => {
 console.log('✅ Both servers starting...');
 console.log('🌐 Python: http://localhost:5000');
 console.log('🌐 Angular: http://localhost:4600');
+console.log('📝 Note: Make sure npm packages are already installed in the Angular project');
