@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
@@ -107,15 +107,40 @@ export class DataService {
     this.paginationSubject.next(pagination);
   }
 
-  postUser(user: any): Observable<any> {
-    return this.http.post('http://127.0.0.1:5000/print-label', user);
+  // Updated postUser method using forkJoin to call multiple APIs in parallel
+  postUser(user: any): Observable<any[]> {
+    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
+    const secondAPI$ = this.http.post('https://dummyjson.com/posts', user); // Replace with your actual second endpoint
+    
+    return forkJoin([firstAPI$, secondAPI$])
+      .pipe(
+        catchError(this.handleError)
+      );
   }
 
-  postUser_data(user: any): Observable<any> {
-    return this.http.post('http://127.0.0.1:5000/print-label', user);
+  postUser_data(user: any): Observable<any[]> {
+    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
+    const secondAPI$ = this.http.post('https://dummyjson.com/posts', user); // Replace with your actual second endpoint
+    
+    return forkJoin([firstAPI$, secondAPI$])
+      .pipe(
+        catchError(this.handleError)
+      );
   }
   
-  postUserinput(user: any): Observable<any> {
-    return this.http.post('http://127.0.0.1:5000/print-label', user);
+  postUserinput(user: any): Observable<any[]> {
+    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
+    const secondAPI$ = this.http.post('https://dummyjson.com/posts', user); // Replace with your actual second endpoint
+    
+    return forkJoin([firstAPI$, secondAPI$])
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  // Error handling method
+  private handleError(error: any): Observable<never> {
+    console.error('API Error:', error);
+    return throwError(() => new Error(error.message || 'Server Error'));
   }
 }
