@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"path": "Read_excel_data_angular-main",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build - Read_excel_data_angular-main",
+			"detail": "ng build"
+		}
+	]
+}
