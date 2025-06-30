@@ -6,10 +6,10 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 // Interface for User data structure
 interface User {
-  id?: number;
+  BadgId?: number;
   nom: string;
   prenom: string;
-  email: string;
+  email?: string; // Made optional if not used
   valide: string;
   created_at: string;
   updated_at: string;
@@ -47,22 +47,13 @@ export class GetDataComponent implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
-  
-  // Replace with your actual API endpoint
-  private apiUrl = 'https://badges.spherebleue.com/api/getbadges';
-  
-
+  private apiUrl = 'http://badges.eevent.ma/api/getbadges';
 
   constructor(private http: HttpClient, public dataService: DataService) {
     // Debounce search input to avoid excessive filtering
     this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged()
-      )
-      .subscribe(searchTerm => {
-        this.performSearch(searchTerm);
-      });
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(searchTerm => this.performSearch(searchTerm));
   }
 
   ngOnInit(): void {
@@ -77,7 +68,7 @@ export class GetDataComponent implements OnInit, OnDestroy {
   fetchUsers(): void {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     this.http.get<User[]>(this.apiUrl).subscribe({
       next: (data) => {
         this.users = data;
@@ -104,20 +95,14 @@ export class GetDataComponent implements OnInit, OnDestroy {
   }
 
   private performSearch(searchTerm: string): void {
-    if (!searchTerm.trim()) {
-      this.filteredUsers = [...this.users];
-    } else {
-      const searchLower = searchTerm.toLowerCase().trim();
-      this.filteredUsers = this.users.filter(user => {
-        return (
-          user.nom.toLowerCase().includes(searchLower) ||
-          user.prenom.toLowerCase().includes(searchLower) ||
-          (user.id && user.id.toString().includes(searchLower))
-        );
-      });
-    }
-    
-    // Reset to first page when search changes
+    this.filteredUsers = searchTerm.trim()
+      ? this.users.filter(user => 
+          user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (user.BadgId && user.BadgId.toString().includes(searchTerm))
+      )
+      : [...this.users];
+
     this.pagination.currentPage = 1;
     this.updatePagination();
   }
@@ -126,11 +111,10 @@ export class GetDataComponent implements OnInit, OnDestroy {
     this.pagination.totalItems = this.filteredUsers.length;
     this.pagination.totalPages = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
     
-    // Ensure current page is valid
     if (this.pagination.currentPage > this.pagination.totalPages && this.pagination.totalPages > 0) {
       this.pagination.currentPage = this.pagination.totalPages;
     }
-    
+
     this.updatePaginatedUsers();
   }
 
@@ -140,7 +124,6 @@ export class GetDataComponent implements OnInit, OnDestroy {
     this.paginatedUsers = this.filteredUsers.slice(startIndex, endIndex);
   }
 
-  // Pagination methods
   goToPage(page: number): void {
     if (page >= 1 && page <= this.pagination.totalPages) {
       this.pagination.currentPage = page;
@@ -163,19 +146,16 @@ export class GetDataComponent implements OnInit, OnDestroy {
   onItemsPerPageChange(event: any): void {
     const itemsPerPage = parseInt(event.target.value, 10);
     this.pagination.itemsPerPage = itemsPerPage;
-    this.pagination.currentPage = 1; // Reset to first page
+    this.pagination.currentPage = 1;
     this.updatePagination();
   }
 
-  // Helper methods for pagination display
   getStartIndex(): number {
-    if (this.pagination.totalItems === 0) return 0;
-    return (this.pagination.currentPage - 1) * this.pagination.itemsPerPage + 1;
+    return this.pagination.totalItems === 0 ? 0 : (this.pagination.currentPage - 1) * this.pagination.itemsPerPage + 1;
   }
 
   getEndIndex(): number {
-    const end = this.pagination.currentPage * this.pagination.itemsPerPage;
-    return Math.min(end, this.pagination.totalItems);
+    return Math.min(this.pagination.currentPage * this.pagination.itemsPerPage, this.pagination.totalItems);
   }
 
   getActualIndex(paginatedIndex: number): number {
@@ -188,15 +168,12 @@ export class GetDataComponent implements OnInit, OnDestroy {
     const pages: number[] = [];
 
     if (total <= 5) {
-      // Show all pages if total is 5 or less
       for (let i = 1; i <= total; i++) {
         pages.push(i);
       }
     } else {
-      // Show current page ± 2
       const start = Math.max(1, current - 2);
       const end = Math.min(total, current + 2);
-      
       for (let i = start; i <= end; i++) {
         pages.push(i);
       }
@@ -206,38 +183,42 @@ export class GetDataComponent implements OnInit, OnDestroy {
   }
 
   getOriginalIndex(user: User): number {
-    return this.users.findIndex(u => u === user);
+    return this.users.findIndex(u => 
+      u.BadgId === user.BadgId && 
+      u.nom === user.nom && 
+      u.prenom === user.prenom &&
+      u.email === user.email
+    );
   }
 
   selectAndSubmitUser(paginatedIndex: number): void {
-    // Get the actual user from paginated data
     const user = this.paginatedUsers[paginatedIndex];
     if (user) {
-      // Find the original index in the full users array
       this.selectedUserIndex = this.getOriginalIndex(user);
-      this.SubmitData();
+      this.submitData();
     }
   }
 
-  SubmitData(): void {
+  submitData(): void {
     const selectedUser = this.users[this.selectedUserIndex];
-    console.log('Selected User:', selectedUser);
     
     if (selectedUser) {
       this.isLoading = true;
       this.errorMessage = '';
       this.successMessage = '';
   
-      // Create object with only nom and prenom
       const userData = {
         last_name: selectedUser.nom,
         first_name: selectedUser.prenom
       };
   
-      this.dataService.postUser_data(userData).subscribe({
-        next: (response) => {
-          console.log('Posted user data:', userData);
-          console.log('Response:', response);
+      // Use the position in the original users array + 1 (like the Id column in your table)
+      const badgId = this.selectedUserIndex + 1;
+  
+      console.log('Selected BadgId:', selectedUser.BadgId, 'Using badgId:', badgId); // Debug log
+  
+      this.dataService.postUser_data(userData, badgId).subscribe({
+        next: () => {
           this.successMessage = 'Données envoyées avec succès!';
           this.isLoading = false;
         },
@@ -249,8 +230,6 @@ export class GetDataComponent implements OnInit, OnDestroy {
       });
     }
   }
-
-  // Getter methods for template
   getPaginatedUsers(): User[] {
     return this.paginatedUsers;
   }

@@ -64,7 +64,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let user of getPaginatedUsers(); let i = index">
-          <td>{{ user.id || getOriginalIndex(user) + 1 }}</td>
+          <td>{{ user.BadgId || getOriginalIndex(user) + 1 }}</td>
           <td>{{ user.nom }}</td>
           <td>{{ user.prenom }}</td>
           <td>

@@ -118,9 +118,17 @@ export class DataService {
       );
   }
 
-  postUser_data(user: any): Observable<any[]> {
+  postUser_data(user: any, badgId: number): Observable<any[]> {
+    console.log('Service - User data for first API:', user);
+    console.log('Service - BadgId for second API:', badgId);
+    
+    // First API call with user data (nom/prenom)
     const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
-    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', user); // Replace with your actual second endpoint
+    
+    // Second API call with only BadgId
+    const secondAPIData = { BadgId: badgId };
+    console.log('Service - Second API data:', secondAPIData);
+    const secondAPI$ = this.http.post('http://badges.eevent.ma/api/esttraite', secondAPIData);
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(
