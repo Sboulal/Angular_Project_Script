@@ -109,8 +109,8 @@ export class DataService {
 
   // Updated postUser method using forkJoin to call multiple APIs in parallel
   postUser(user: any): Observable<any[]> {
-    const firstAPI$ = this.http.post('https://jsonplaceholder.typicode.com/todos/', user);
-    const secondAPI$ = this.http.post('https://jsonplaceholder.typicode.com/todos/', user); // Replace with your actual second endpoint
+    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
+    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', user); // Replace with your actual second endpoint
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(
@@ -119,8 +119,8 @@ export class DataService {
   }
 
   postUser_data(user: any): Observable<any[]> {
-    const firstAPI$ = this.http.post('https://jsonplaceholder.typicode.com/todos/', user);
-    const secondAPI$ = this.http.post('https://jsonplaceholder.typicode.com/todos/', user); // Replace with your actual second endpoint
+    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
+    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', user); // Replace with your actual second endpoint
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(
@@ -152,8 +152,8 @@ export class DataService {
       email: user.email
     };
     
-    const firstAPI$ = this.http.post('https://jsonplaceholder.typicode.com/todos/', firstAPIData);
-    const secondAPI$ = this.http.post('https://jsonplaceholder.typicode.com/todos/', secondAPIData);
+    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', firstAPIData);
+    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', secondAPIData);
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(

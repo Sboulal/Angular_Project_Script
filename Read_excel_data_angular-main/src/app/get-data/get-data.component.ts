@@ -49,7 +49,7 @@ export class GetDataComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
   // Replace with your actual API endpoint
-  private apiUrl = 'https://jsonplaceholder.typicode.com/todos/';
+  private apiUrl = 'https://badges.spherebleue.com/api/getbadges';
   
 
 
