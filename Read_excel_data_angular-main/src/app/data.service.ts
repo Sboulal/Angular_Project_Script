@@ -161,7 +161,7 @@ export class DataService {
     };
     
     const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', firstAPIData);
-    const secondAPI$ = this.http.post('https://badges.spherebleue.com/badge', secondAPIData);
+    const secondAPI$ = this.http.post('http://badges.eevent.ma/api/ajouterins', secondAPIData);
     
     return forkJoin([firstAPI$, secondAPI$])
       .pipe(

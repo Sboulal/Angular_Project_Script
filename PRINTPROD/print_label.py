@@ -74,7 +74,7 @@ def create_label(first_name, last_name):
     print(f"Using font size: {font_size}pt for '{full_name}'")
     return image
 
-def print_label(first_name, last_name, printer_identifier="usb://0x04f9:0x209c", model="QL-810W"):
+def print_label(first_name, last_name, printer_identifier="usb://0x04f9:0x209b", model="QL-800"):
     # Check if model is valid
     supported_models = check_supported_models()
     if model not in supported_models:

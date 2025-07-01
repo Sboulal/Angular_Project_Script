@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 // Interface for User data structure
 interface User {
-  BadgId?: number;
+  badgid?: number;
   nom: string;
   prenom: string;
   email?: string; // Made optional if not used
@@ -99,7 +99,7 @@ export class GetDataComponent implements OnInit, OnDestroy {
       ? this.users.filter(user => 
           user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (user.BadgId && user.BadgId.toString().includes(searchTerm))
+          (user.badgid && user.badgid.toString().includes(searchTerm))
       )
       : [...this.users];
 
@@ -184,7 +184,7 @@ export class GetDataComponent implements OnInit, OnDestroy {
 
   getOriginalIndex(user: User): number {
     return this.users.findIndex(u => 
-      u.BadgId === user.BadgId && 
+      u.badgid === user.badgid && 
       u.nom === user.nom && 
       u.prenom === user.prenom &&
       u.email === user.email
@@ -206,18 +206,18 @@ export class GetDataComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       this.errorMessage = '';
       this.successMessage = '';
-  
+      
       const userData = {
-        last_name: selectedUser.nom,
-        first_name: selectedUser.prenom
+        last_name: selectedUser.nom.toUpperCase(),
+        first_name: selectedUser.prenom.toUpperCase()
       };
-  
+      
       // Use the position in the original users array + 1 (like the Id column in your table)
-      const badgId = this.selectedUserIndex + 1;
-  
-      console.log('Selected BadgId:', selectedUser.BadgId, 'Using badgId:', badgId); // Debug log
-  
-      this.dataService.postUser_data(userData, badgId).subscribe({
+      const badgid = this.selectedUserIndex + 1;
+      
+      console.log('Selected badgid:', selectedUser.badgid, 'Using badgid:', badgid); // Debug log
+      
+      this.dataService.postUser_data(userData, badgid).subscribe({
         next: () => {
           this.successMessage = 'Données envoyées avec succès!';
           this.isLoading = false;

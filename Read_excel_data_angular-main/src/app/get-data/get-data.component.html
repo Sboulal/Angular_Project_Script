@@ -57,6 +57,7 @@
           <th>Id</th>
           <th>Nom</th>
           <th>Prenom</th>
+          <th>Email</th>
           <th>Statut</th>
           <th>Creation de date</th>
           <th>Actions</th>
@@ -64,9 +65,10 @@
       </thead>
       <tbody>
         <tr *ngFor="let user of getPaginatedUsers(); let i = index">
-          <td>{{ user.BadgId || getOriginalIndex(user) + 1 }}</td>
+          <td>{{ user.badgid || getOriginalIndex(user) + 1 }}</td>
           <td>{{ user.nom }}</td>
           <td>{{ user.prenom }}</td>
+          <td>{{user.email}}</td>
           <td>
             <span class="green-checkmark" *ngIf="user.valide === '1'">&#10003;</span>
             <span *ngIf="user.valide === '0'">&#x274C;</span>

@@ -28,11 +28,11 @@ export class AddUserComponent {
     if (this.user.nom.trim() && this.user.prenom.trim() && this.user.email.trim()) {
       // Prepare complete user data for the service
       const userData = {
-        nom: this.user.nom.trim(),
-        prenom: this.user.prenom.trim(),
+        nom: this.user.nom.trim().toUpperCase(),
+        prenom: this.user.prenom.trim().toUpperCase(),
         email: this.user.email.trim()
       };
-
+  
       // Use your dataService to post user input
       this.dataService.postUserinput(userData).subscribe({
         next: (response) => {
