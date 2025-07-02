@@ -146,24 +146,15 @@ export class DataService {
   //     );
   // }
 
-  postUserinput(user: any): Observable<any[]> {
-    // First API receives only nom and prenom
-    const firstAPIData = {
-      nom: user.nom,
-      prenom: user.prenom
-    };
-    
-    // Second API receives nom, prenom, and email
-    const secondAPIData = {
+  postUserinput(user: any): Observable<any> {
+    // API receives nom, prenom, and email
+    const apiData = {
       nom: user.nom,
       prenom: user.prenom,
       email: user.email
     };
     
-    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', firstAPIData);
-    const secondAPI$ = this.http.post('http://badges.eevent.ma/api/ajouterins', secondAPIData);
-    
-    return forkJoin([firstAPI$, secondAPI$])
+    return this.http.post('http://badges.eevent.ma/api/ajouterins', apiData)
       .pipe(
         catchError(this.handleError)
       );
