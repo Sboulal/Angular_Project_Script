@@ -118,22 +118,33 @@ export class DataService {
       );
   }
 
+  printLabel(user: any): Observable<any> {
+    console.log('Service - User data for print label API:', user);
+    return this.http.post('http://127.0.0.1:5000/print-label', user)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+  
+  // Second API - Update Badge Status
+  updateBadgeStatus(badgId: number): Observable<any> {
+    const requestData = { badgId: badgId };
+    console.log('Service - Badge status update data:', requestData);
+    return this.http.post('http://badges.eevent.ma/api/esttraite', requestData)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+  
+  // Optional: Keep the combined method if you still need it
   postUser_data(user: any, badgId: number): Observable<any[]> {
     console.log('Service - User data for first API:', user);
     console.log('Service - BadgId for second API:', badgId);
     
-    // First API call with user data (nom/prenom)
-    const firstAPI$ = this.http.post('http://127.0.0.1:5000/print-label', user);
+    const printLabel$ = this.printLabel(user);
+    const updateStatus$ = this.updateBadgeStatus(badgId);
     
-    // Second API call with only BadgId
-    const secondAPIData = { BadgId: badgId };
-    console.log('Service - Second API data:', secondAPIData);
-    const secondAPI$ = this.http.post('http://badges.eevent.ma/api/esttraite', secondAPIData);
-    
-    return forkJoin([firstAPI$, secondAPI$])
-      .pipe(
-        catchError(this.handleError)
-      );
+    return forkJoin([printLabel$, updateStatus$]);
   }
   
   // postUserinput(user: any): Observable<any[]> {
